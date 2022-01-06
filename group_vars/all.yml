@@ -1,0 +1,5 @@
+---
+# Aquí podemos poner variables que estarán disponibles para todos los hosts
+equipo: "{{ inventory_hostname }}"
+ip: "{{ ansible_eth1.ipv4.address }}"
+

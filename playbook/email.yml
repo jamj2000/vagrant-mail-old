@@ -1,0 +1,42 @@
+- hosts:
+    - correo1
+    - correo2
+
+  gather_facts: true
+  remote_user: vagrant
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  # Desactivar ejecución en paralelo para evitar problemas con Vagrant-Cachier
+  serial: 1
+
+
+  tasks:
+    # Instalación
+    - name: Instalar Postifx y Dovecot
+      apt: 
+        name: ['postfix', 'dovecot-imapd']
+        state: present
+      notify:
+        - start postfix
+        - start dovecot
+
+    # Configurar resolvconf para utilizar nuestro DNS
+    - name: Configurar resolvconf para utilizar nuestro DNS
+      copy: src=files/email/head
+        dest=/etc/resolvconf/resolv.conf.d/head
+        owner=root group=root mode=0644
+      notify: update resolvconf
+
+
+  handlers:
+    - name: start postfix
+      service: name=postfix state=started
+
+    - name: start dovecot
+      service: name=dovecot state=restarted
+
+    - name: update resolvconf
+      command: resolvconf -u
+
